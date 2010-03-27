@@ -29,9 +29,6 @@ namespace CustomerApp.Support.ViewModel
             }
             set
             {
-                if(_customer.FirstName != null
-                    && _customer.FirstName.Equals(value))
-                    return;
                 _customer.FirstName = value;
                 OnPropertyChanged("FirstName");
             }
@@ -45,9 +42,6 @@ namespace CustomerApp.Support.ViewModel
             }
             set
             {
-                if (_customer.LastName != null
-                    && _customer.LastName.Equals(value))
-                    return;
                 _customer.LastName = value;
                 OnPropertyChanged("LastName");
             }
