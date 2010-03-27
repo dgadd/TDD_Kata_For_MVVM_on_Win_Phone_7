@@ -1,7 +1,7 @@
 from URL: http://codingsolutions.blogspot.com/2010/03/windows-phone-7-tdd-kata-using-mvvm-and.html
 
 Building a Windows Phone 7 app with MVVM pattern, using TDD and mock objects
-at 10:15 AM
+
 The goal of this article is to take you through the process of creating a Windows Phone 7 app using Test-Driven Development, designing each feature of the app through a series of incremental tests. The concept is loosely modeled on the TDD Calculator kata as explained by Roy Osherove, although introducing an entire framework, with as many steps as required in the instructions below, moves outside the boundaries of a properly focused kata to what might more properly be called a tutorial. However, my goal is that these steps could be repeatedly practised, like a kata, to develop a consistent approach to TDD using the Windows Phone 7 unit testing framework.
 
 To be able to test effectively in the presentation layer, we want to use the appropriate pattern. The pattern for XAML frameworks (WPF, Silverlight, and now Windows Phone 7) is the Model-View-ViewModel (MVVM) design pattern, in which the ViewModel is isolated from the presentation layer and therefore testable (much like the controller in the MVC pattern, or presenter in the MVP pattern.) The difference here is that the passing of data back and forth between ViewModel and View is done by the framework itself, using a data binding implementation. (This will get much clearer as you work through the tests.)
@@ -413,13 +413,20 @@ NOTE At this point, in WPF, the Button's Command property could be set to the da
 30) Extract the code zip, and locate the ButtonService.cs class.
 31) Add a new folder/namespace to your existing folders, named "ThirdParty". Drag and drop ButtonService.cs into this folder.
 32) Open the ButtonService.cs class, and change the namespace to match the path of your folder.
+NOTE 2010Mar27 As of this writing, there is a TYPO in the ButtonService.cs class. In the initial static registration of the CommandParameterProperty, the 2nd parameter (see code snippet below) is set to typeof(string). This will cause a null error later, in the event raising method, when attempting to cast the command instance to ICommand (because it incorrectly being passed as string. Therefore, CHANGE the casting on the 2nd parameter to be typeof(ICommand).
+
+public static readonly DependencyProperty CommandParameterProperty =
+        DependencyProperty.RegisterAttached("CommandParameter", typeof(string), typeof(ButtonService),
+        new PropertyMetadata(OnCommandParameterChanged));
+
 33) In MainPage.xaml, you need to add an alias to this namespace (similar to the xmlns:vm namespace you created earlier.) eg. "thirdParty". Add this directly below the xmlns:vm namespace reference.
 
 xmlns:thirdParty="clr-namespace:CustomerApp.Support.ThirdParty"
 
-34) Add a new attribute to the <Button> element to provide data binding to the SaveCustomerCommand.
+34) Add a new attribute to the <Button> element to provide data binding to the CustomerSaveCommand.
+NOTE 2010Mar27 Path must be bound to the ViewModel's property name, NOT the property type (if they are different; for example, if the property were CustomerViewModel.Save of property type CustomerSaveCommand, then the correct binding path would be "Save").
 
-thirdParty:ButtonService.Command="{Binding Path=SaveCustomerCommand}"
+thirdParty:ButtonService.Command="{Binding Path=CustomerSaveCommand}"
 
 35) You now need to turn off your tests to run your application. BEFORE you do that, run your tests one more time and make sure that all tests are passing.
 36) With all tests passing, let's run the application. In the MainPage.xaml.cs, comment out the lines of code which trigger the unit testing framework that we added at the beginning of this tutorial:
@@ -435,8 +442,4 @@ thirdParty:ButtonService.Command="{Binding Path=SaveCustomerCommand}"
 37) In ButtonServices.cs, set a breakpoint on the line of code within the SetCommandParameter() method.
 38) In the FakeCustomerRepository.cs, set a breakpoint on the line of code within the SaveCustomer() method.
 39) Finally, launch the application. Enter values into the FirstName and LastName fields, and press the SaveButton.
-40) Observe whether the breakpoints are hit.
-
-NOTE At this point in my testing, the breakpoints are NOT hit. I will update this blog entry as soon as I have been able to resolve this issue. 2010Mar22 9:06 AM
-
-UPDATE: @BrianGenisio has kindly directed me to this article by Damian Schenkelman on Silverlight and attached behaviors. I'll be reviewing this and then updating the Button instructions above. 2010Mar22 9:53 AM
+40) Observe that the breakpoints are hit, and the Customer is being passed correctly to the Customer repository's Save command. 
